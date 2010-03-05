@@ -1,3 +1,12 @@
+/*
+ * memdebug - A simple malloc/free debugger
+ *
+ * This can essentially be useful on embedded systems platforms where tools such
+ * as valgrind are not available.
+ *
+ * Copyright (c) 2010, Tobias Klauser <tklauser@distanz.ch>
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 
