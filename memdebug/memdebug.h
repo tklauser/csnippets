@@ -6,7 +6,7 @@
 #ifdef MEMDEBUG_TRACE
 # define memdebug_trace(fmt, args...) \
 	({ \
-	 fprintf(stderr, "\n\n*** " fmt " ***\n\n", ##args); \
+	 fprintf(stderr, "*** " fmt " ***\n", ##args); \
 	 fflush(stderr); \
 	 })
 #else
