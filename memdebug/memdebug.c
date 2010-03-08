@@ -12,13 +12,30 @@
 
 /* define/undef to enable tracing of errors */
 #define MEMDEBUG_TRACE
-/* define/undef to enable tracing of double free errors */
-#define MEMDEBUG_TRACE_DOUBLE_FREE
 
 #include "memdebug.h"
 
 static struct memdebug_heap_item *heap_head = NULL;
 static struct memdebug_heap_item *heap_tail = NULL;
+
+void memdebug_start(void)
+{
+	/* Empty for now */
+}
+
+void memdebug_cleanup(void)
+{
+	struct memdebug_heap_item *hi;
+
+	for (hi = heap_head; hi; hi = hi->next) {
+		if (hi->addr)
+			free(hi->addr);
+		free(hi);
+	}
+
+	heap_head = NULL;
+	heap_tail = NULL;
+}
 
 void *__memdebug_malloc(size_t size, const char *func,
                         const char *file, const unsigned int line)
@@ -41,20 +58,15 @@ void *__memdebug_malloc(size_t size, const char *func,
 	hi->func = func;
 	hi->file = file;
 	hi->line = line;
-#ifdef MEMDEBUG_TRACE_DOUBLE_FREE
 	hi->freed_func = NULL;
 	hi->freed_file = NULL;
 	hi->line = 0;
-#endif
 
 	if (!heap_head)
 		heap_head = hi;
-	if (!heap_tail)
-		heap_tail = hi;
-	else {
+	if (heap_tail)
 		heap_tail->next = hi;
-		heap_tail = hi;
-	}
+	heap_tail = hi;
 
 	return ret;
 
@@ -74,7 +86,7 @@ void __memdebug_free(void *ptr, const char *func,
 	}
 
 	for (hi = heap_head, prev = NULL; hi; prev = hi, hi = hi->next)
-		if (hi->addr ==ptr)
+		if (hi->addr == ptr)
 			break;
 
 	if (!hi) {
@@ -82,7 +94,6 @@ void __memdebug_free(void *ptr, const char *func,
 		return;
 	}
 
-#ifdef MEMDEBUG_TRACE_DOUBLE_FREE
 	if (hi->freed_func) {
 		memdebug_trace("double free at %p (%s:%d:%s)\nalready freed by %s:%d:%s",
 				ptr, file, line, func, hi->freed_file, hi->freed_line, hi->freed_func);
@@ -92,31 +103,31 @@ void __memdebug_free(void *ptr, const char *func,
 	hi->freed_func = func;
 	hi->freed_file = file;
 	hi->freed_line = line;
-#else
-	/* Delete the item from the linked list */
-	if (prev)
-		prev->next = hi->next;
-	else
-		heap_head = hi->next;
-	if (heap_tail == hi)
-		heap_tail = prev;
 
-	free(hi);
-#endif
-
-	free(ptr);
+	/* Free the memory but keep the memdebug information */
+	free(hi->addr);
+	hi->addr = NULL;
 }
 
-void memdebug_report(void)
+void memdebug_report(int report_all)
 {
 	struct memdebug_heap_item *hi;
 	size_t total_size = 0;
+	size_t still_allocated = 0;
 
-	fprintf(stderr, "\n\n*** Reporting allocated memory ***\n");
+	fprintf(stderr, "\n\n*** Reporting allocated/freed memory ***\n");
 	for (hi = heap_head; hi; hi = hi->next) {
-		fprintf(stderr, "  %zu bytes at %p (%s:%d:%s)\n", hi->size, hi->addr, hi->file, hi->line, hi->func);
+		if (hi->addr) {
+			fprintf(stderr, "  IN USE  %zu bytes at %p (%s:%d:%s)\n",
+					hi->size, hi->addr, hi->file, hi->line, hi->func);
+			still_allocated += hi->size;
+		} else if (report_all) {
+			fprintf(stderr, "  FREE    %zu bytes at %p (%s:%d:%s)\n",
+					hi->size, hi->addr, hi->file, hi->line, hi->func);
+		}
 		total_size += hi->size;
 	}
-	fprintf(stderr, "Total size: %zu bytes\n\n", total_size);
+	fprintf(stderr, "Total size: %zu bytes, %zu bytes still allocated\n\n",
+			total_size, still_allocated);
 	fflush(stderr);
 }
