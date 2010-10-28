@@ -1,0 +1,33 @@
+ README for unittest csnippet
+==============================
+
+This is a simple unit testing framework for C code.  The header unittest.h
+contains all assertion functions to use in your unit test. A python script -
+runtest.py - is used to to run all unit tests passed to it and print their
+respective result.
+
+The basic usage is as follows:
+
+1) Create your unit test using the following skeleton code:
+
+#include "unittest.h"
+
+int main(int argc, char **argv)
+{
+	return TEST_PASS;
+}
+
+2) Add some assertions testing your code. You might need to include further
+   headers.
+
+3) Compile the unit test, linking it against the code you want to test.
+   Alternatively your unit test could also be part of the software your writing
+   and activated/deactivated through preprocessor macros.
+
+4) Run the unit test either manually or using runtest.py:
+
+   ./runtest.py <unittest>
+
+   When manually running the unit test, it returns 0 if the test was passed and
+   1 if there was an assertion error. Additionally an error message is printed
+   on the first assertion error.
