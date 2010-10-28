@@ -1,3 +1,9 @@
+/*
+ * Not copyrighted 2010 Tobias Klauser
+ *
+ * This code is in public domain.
+ */
+
 #ifndef _CRC32_H_
 #define _CRC32_H_
 

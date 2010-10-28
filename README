@@ -1,0 +1,8 @@
+ README for csnippets
+======================
+
+This directory contains a collection of C-code snippets to be used as part of
+various other software.
+
+All code is licensed under permissive licenses, e.g. BSD (or similar) license or
+in the public domain. See the respective source files for details.

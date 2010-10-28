@@ -1,3 +1,9 @@
+/*
+ * Not copyrighted 2010 Tobias Klauser
+ *
+ * This code is in public domain.
+ */
+
 #include <stdlib.h>
 #include <stdint.h>
 
