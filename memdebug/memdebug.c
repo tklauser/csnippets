@@ -7,6 +7,10 @@
  * Copyright (c) 2010 Zurich University of Applied Sciences
  * Copyright (c) 2010 Tobias Klauser <tklauser@distanz.ch>
  *
+ * HISTORY
+ * 12.11.2010	gram	Bug in function 'memdebug_cleanup' corrected (access
+ * 						just freed struct)
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
@@ -44,11 +48,12 @@ void memdebug_start(void)
 
 void memdebug_cleanup(void)
 {
-	struct memdebug_heap_item *hi;
+	struct memdebug_heap_item *hi, *next;
 
-	for (hi = heap_head; hi; hi = hi->next) {
+	for (hi = heap_head; hi; hi = next) {
 		if (hi->addr)
 			free(hi->addr);
+		next = hi->next;
 		free(hi);
 	}
 
