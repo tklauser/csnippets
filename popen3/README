@@ -1,0 +1,20 @@
+example usage:
+
+	#include <unistd.h>
+	#include "popen3.h"
+
+	int pipes[3];
+	pid_t pid;
+	int ret;
+
+	const char *cmd = "cat -n";
+
+	pid = popen3(cmd, pipes);
+
+	/*
+	 *  - write to pipes[0] will go to stdin of cat
+	 *  - read from pipes[1] to get stdout of cat
+	 *  - read from pipes[2] to get stderr of ct
+	 */
+
+	ret = pclose3(pid, pipes);
